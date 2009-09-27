@@ -1,0 +1,47 @@
+[ This is a copy of the header from the source file. :) ]
+
+###########################################################################
+# SQL Shell :: A shell for your SQL!
+# -------------------------------------
+#
+# Usage:
+#
+# sqlsh.rb mysql://<username>:<password>@<hostname>/
+#
+# Refactoring:
+# ---------------------
+# * Steal jed's display-in-colums thingy
+# * Browser#for(path) returns a new browser in that path
+# => ls("/what/lala") is implemented by @browser.for("/what/lala").ls
+# => can all commands work without "use"?
+# => #context method uses path info, not "USE"
+# * option parser
+# * path parser (make paths the standard db interface)
+# => path.up
+# => path.database_name
+# => path.=
+# => path.table_name
+# => path.column_name
+#
+# Feature todos:
+# ---------------------
+# * shell style commands:
+# => "open" command (auto-prompt for username/password)
+# => "rm" command (drop database/table/column/index)
+# => "mkdir" or "new" command (creates databases, tables, and columns)
+# => "mv" or "rename" (for table, column, etc.)
+# => "edit <thing>" pops up a curses dialog w/ types and stuff (nano/vim/pico?)
+# => "ls -l" shows {db: sizes/tables, table: columns/types/indexes, column: }.
+# => remember last connection and auto-connect next session
+# => less-style results (scroll left/right/up/down)
+# => make a reuslt object that can display in short (column)
+# long (ls -l) formats.
+# => pager for long results (less?)
+# => assigning result sets, and _ for last set (history of results?)
+# => browser.root = argv[0]
+# => log sql commands without ugly timestamps
+# => a way to do joins (set intersection?)
+# |_ table1<=column=>table2
+# => compact table display mode (truncate) fields
+# => use URI (or addressable) to parse uris
+# => bookmarks
