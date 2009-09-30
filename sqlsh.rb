@@ -200,10 +200,10 @@ class Browser
     case context
       when :columns
         # schema
-        @db.fetch("describe `#{@table}`")
+        @db.fetch("describe `#{@table}`").map { |r| [ r[:Field], r[:Type] ] }
       when :tables
         # tables w/ rows, index size, etc.
-        
+        nil
       when :databases
         # database size, table count, etc.
         list = databases.map { |dbname| [dbname, {:tables=>tables_for(dbname).size}] }
@@ -237,11 +237,23 @@ class Browser
     end
   end
 
+
+  def column_type(column)
+    
+  end
+
+  TRANSLATE_TO_SQL_COLUMN_TYPE = {
+    "int" => "INTEGER",
+    "string" => "VARCHAR(255)",
+    "str" => "VARCHAR(255)",
+  }
+
   def mv(src, dest)
     case context
       when :columns
-        column_type = ? # INTEGER, VARCHAR(255), etc.
-        @db << "ALTER TABLE `#{@table}` CHANGE `#{src}` `#{dest}` #{column_type}"
+        dest, type = dest.split(':') # INTEGER, VARCHAR(255), etc.
+        sql_type = TRANSLATE_TO_SQL_COLUMN_TYPE[type] || type
+        @db << "ALTER TABLE `#{@table}` CHANGE `#{src}` `#{dest}` #{sql_type}"
       when :tables
         @db << "RENAME TABLE `#{src}` TO `#{dest}`"
       when :databases
@@ -420,7 +432,7 @@ class CLI
         display_results @browser.ls_l($1 || $2)
       when /^ls ([^-]\S+)$/i
         @browser.ls($1)
-      when /^mkdir (\S+)$/i
+      when /^mk(?:dir)? (\S+)$/i
         @browser.mkdir($1)
       when /^(?:mv|rename|ren) (\S+) (\S+)$/i
         @browser.mv($1, $2)
