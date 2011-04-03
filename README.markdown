@@ -6,9 +6,9 @@ Also lets you execute queries on databases using Ruby's Sequel syntax.
 
 # Usage
 
-> sqlsh.rb mysql://<username>:<password>@<hostname>/
+> sqlsh.rb mysql://&lt;username&gt;:&lt;password&gt;@&lt;hostname&gt;/
 
-Screenshot: http://chris.ill-logic.com/images/sqlsh.png
+<a href="http://chris.ill-logic.com/images/sqlsh.png">Click here for a screenshot</a> 
 
 # Planned Features
 
@@ -27,7 +27,7 @@ Screenshot: http://chris.ill-logic.com/images/sqlsh.png
 * Browser#for(path) returns a new browser in that path
   * ls("/what/lala") is implemented by @browser.for("/what/lala").ls
   * can all commands work without "use"?
-  * #context method uses path info, not "USE"
+  * `#context` method uses path info, not "USE"
 * option parser
 * path parser (make paths the standard db interface)
   * path.up
@@ -46,7 +46,7 @@ Screenshot: http://chris.ill-logic.com/images/sqlsh.png
 * browser.root = argv[0]
 * log sql commands without ugly timestamps
 * a way to do joins (set intersection?)
-  * table1<=column=>table2
+  * table1&lt;=column=&gt;table2
 * compact table display mode (truncate) fields
 * use URI (or addressable) to parse uris
 * bookmarks
