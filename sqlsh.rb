@@ -10,7 +10,11 @@
 #
 # Refactoring:
 # ---------------------
-# * Steal jed's display-in-colums thingy
+# * Specs
+# * Create a "query for information class" that abstracts over the different database types
+#   ^- then, use this to implement the interface
+# * Use something like 'Slop'
+# * Use Term::Table
 # * Browser#for(path) returns a new browser in that path
 #   => ls("/what/lala") is implemented by @browser.for("/what/lala").ls
 #   => can all commands work without "use"?
@@ -31,7 +35,9 @@
 #   => "mkdir" or "new" command (creates databases, tables, and columns)
 #   => "mv" or "rename" (for table, column, etc.)
 #   => "edit <thing>" pops up a curses dialog w/ types and stuff (nano/vim/pico?)
-#   => "ls -l" shows {db: sizes/tables, table: columns/types/indexes, column: }. 
+#   => "ls -l" shows {db: sizes/tables, table: columns/types/indexes, column: }.
+# => args can be files or urls (intelligently guess which one the user means)
+# => let the user open MySQL DB files directly (for MySQLi apps) 
 # => remember last connection and auto-connect next session
 # => less-style results (scroll left/right/up/down)
 # => make a reuslt object that can display in short (column)
@@ -45,37 +51,13 @@
 # => compact table display mode (truncate) fields
 # => use URI (or addressable) to parse uris 
 # => bookmarks
+# => import/export databases (SQL, CSV, YAML, JSON, etc.)
 
 ###########################################################################
 # Required modules
-%w(rubygems sequel logger pp readline colorize).each{|mod| require mod}
-###########################################################################
-
-
-
-###########################################################################
-# Helpers (aka. MonkeyPatches)
-#
-class Symbol
-  def to_proc
-    Proc.new { |*args| args.shift.__send__(self, *args) }
-  end
-end
-
-class String
-  def pad(n)
-    amount = [0,(n-size)].max   # clip negative values to 0
-    self + ' '*amount
-  end
-  
-  def startswith(sub)
-    (self =~ /^#{Regexp.escape(sub.to_s)}/) != nil
-  end
-end
-
-class Array
-  alias_method :filter, :select
-end
+require 'epitools'
+require 'sequel'
+require 'readline'
 ###########################################################################
 
 
@@ -135,6 +117,10 @@ class Browser
     @db[@table].columns.map(&:to_s).sort
   end
   
+  def table_stats
+    table_stats_for(@db)
+  end
+  
   def use_table!(table)
     if table_exists? table
       @table = table.to_sym
@@ -156,7 +142,8 @@ class Browser
   #
   def table_stats_for(dbname)
     results = {}
-    @db.fetch("SHOW TABLE STATUS FROM `#{dbname}`").map do |tbl|
+
+    @db.fetch("SHOW TABLE STATUS FROM `#{dbname}`").each do |tbl|
       results[tbl[:Name]] = {
         :data_size    => tbl[:Data_length], 
         :index_size   => tbl[:Index_length],
@@ -170,8 +157,9 @@ class Browser
         :encoding     => tbl[:Collation],
       }
     end
+    
+    results
   end
-      
   
   def database_size_for(dbname)
     db_size = 0
@@ -204,6 +192,7 @@ class Browser
       when :tables
         # tables w/ rows, index size, etc.
         nil
+        
       when :databases
         # database size, table count, etc.
         list = databases.map { |dbname| [dbname, {:tables=>tables_for(dbname).size}] }
@@ -243,9 +232,9 @@ class Browser
   end
 
   TRANSLATE_TO_SQL_COLUMN_TYPE = {
-    "int" => "INTEGER",
-    "string" => "VARCHAR(255)",
-    "str" => "VARCHAR(255)",
+    "int"     => "INTEGER",
+    "string"  => "VARCHAR(255)",
+    "str"     => "VARCHAR(255)",
   }
 
   def mv(src, dest)
@@ -339,7 +328,7 @@ class Browser
   
   
   def completions(sub)
-    ls.filter{|x| x.startswith(sub) }
+    ls.select{|x| x.startswith(sub) }
   end
   
 end
@@ -399,10 +388,10 @@ class CLI
       things += [''] * (cols - (things.size % cols))
     end
     
-    things.map!{|thing| thing.pad(col_width)}
+    things.map!{|thing| thing.ljust(col_width)}
     
     things.each_slice(cols) do |slice|
-      puts slice.join(' | ').colorize(color)
+      puts slice.join(' | ').send(color)
     end
   end
   
@@ -438,6 +427,8 @@ class CLI
         @browser.mv($1, $2)
       when /^cd (\S+)/i
         @browser.cd($1)
+      when ".."
+        @browser.cd("..")
       when /^rm -r (\S+)/i
         @browser.rm_r($1)
       when /^rm (\S+)/i
