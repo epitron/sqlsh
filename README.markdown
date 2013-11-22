@@ -4,11 +4,11 @@ Lets you navigate your SQL databases as if they were directories. Use familiar c
 
 Also lets you execute queries on databases using Ruby's Sequel syntax.
 
+![sqlsh screenshot](http://chris.ill-logic.com/images/sqlsh.png)
+
 # Usage
 
 > sqlsh.rb mysql://&lt;username&gt;:&lt;password&gt;@&lt;hostname&gt;/
-
-<a href="http://chris.ill-logic.com/images/sqlsh.png">Click here for a screenshot</a> 
 
 # Planned Features
 
