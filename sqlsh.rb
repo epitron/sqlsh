@@ -396,11 +396,12 @@ class CLI
   end
   
   def display_results(results)
-    if results.is_a? Sequel::Dataset
-      results.print
-    else
-      pp results
-    end
+    # if results.is_a? Sequel::Dataset
+    #   results.print
+    # else
+    #   pp results
+    # end
+    ap results
   end
   
   def quit
