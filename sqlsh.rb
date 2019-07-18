@@ -298,13 +298,17 @@ class Browser
       return
     end
     
-    case context
-      when :columns
-        @db[table ? table : @table].instance_eval(expr)
-      when :tables
-        @db[table].instance_eval(expr)
-      when :databases
-        return
+    begin
+      case context
+        when :columns
+          @db[table ? table : @table].instance_eval(expr)
+        when :tables
+          @db[table].instance_eval(expr)
+        when :databases
+          return
+      end
+    rescue Exception => e
+      puts e.inspect
     end
   end
   
