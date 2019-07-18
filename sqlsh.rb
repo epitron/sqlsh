@@ -378,21 +378,22 @@ class CLI
   #[:magenta, :black, :cyan, :red, :default, :white, :green, :yellow, :blue]
 
   def column_print(things, color=:white)
-    return unless things.any?
-    sizes = things.map{|x|x.size}
-    col_width = sizes.max
-    cols = 80 / (col_width+3)
-    cols = 4 if cols > 4
+    # return unless things.any?
+    # sizes = things.map{|x|x.size}
+    # col_width = sizes.max
+    # cols = 80 / (col_width+3)
+    # cols = 4 if cols > 4
     
-    if things.size % cols != 0
-      things += [''] * (cols - (things.size % cols))
-    end
+    # if things.size % cols != 0
+    #   things += [''] * (cols - (things.size % cols))
+    # end
     
-    things.map!{|thing| thing.ljust(col_width)}
+    # things.map!{|thing| thing.ljust(col_width)}
     
-    things.each_slice(cols) do |slice|
-      puts slice.join(' | ').send(color)
-    end
+    # things.each_slice(cols) do |slice|
+    #   puts slice.join(' | ').send(color)
+    # end
+    puts Term::Table.new(things).to_s.send(color)
   end
   
   def display_results(results)
